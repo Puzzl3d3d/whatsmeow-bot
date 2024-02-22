@@ -102,7 +102,7 @@ func GetEventHandler(client *whatsmeow.Client) func(interface{}) {
                 reFont := regexp.MustCompile(`(?i)</?font[^>]*>`)
                 body = []byte(reFont.ReplaceAllString(string(body), ""))
 
-                body = "```\n"+body+"\n```"
+                body = "```\n"+string(body)+"\n```"
                 
                 // Send the phonetic response back as a message
                 msg := &waProto.Message{
