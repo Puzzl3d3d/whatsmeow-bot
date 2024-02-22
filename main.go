@@ -8,6 +8,8 @@ import (
     "syscall"
     "net/http"
     "io/ioutil"
+    "regexp"
+    "strings"
 
     _ "github.com/mattn/go-sqlite3"
     "github.com/mdp/qrterminal/v3"
@@ -92,6 +94,15 @@ func GetEventHandler(client *whatsmeow.Client) func(interface{}) {
                     fmt.Printf("Failed to read phonetic response: %v\n", err)
                     return
                 }
+
+                body = string(body)
+
+                body = strings.ReplaceAll(body, "<br>", "\n")
+                reBold := regexp.MustCompile(`(?i)<b>(.*?)</b>`)
+                body = reBold.ReplaceAllString(body, `*$1*`)
+                reFont := regexp.MustCompile(`(?i)</?font[^>]*>`)
+                body = reFont.ReplaceAllString(body, ``)
+
             
                 // Send the phonetic response back as a message
                 msg := &waProto.Message{
