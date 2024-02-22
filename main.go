@@ -6,6 +6,8 @@ import (
     "os"
     "os/signal"
     "syscall"
+    "net/http"
+    "io/ioutil"
 
     _ "github.com/mattn/go-sqlite3"
     "github.com/mdp/qrterminal/v3"
@@ -76,6 +78,28 @@ func GetEventHandler(client *whatsmeow.Client) func(interface{}) {
                     if err != nil {
                         fmt.Printf("Failed to send reaction: %v\n", err)
                     }
+                }
+            } else if len(messageBody) > 9 && messageBody[:9] == "!phonetic" {
+                word := messageBody[10:]
+                resp, err := http.Get("https://flask.puzzl3d.dev/phonemes/" + word)
+                if err != nil {
+                    fmt.Printf("Failed to get phonetic: %v\n", err)
+                    return
+                }
+                defer resp.Body.Close()
+                body, err := ioutil.ReadAll(resp.Body)
+                if err != nil {
+                    fmt.Printf("Failed to read phonetic response: %v\n", err)
+                    return
+                }
+            
+                // Send the phonetic response back as a message
+                msg := &waProto.Message{
+                    Conversation: proto.String(string(body)),
+                }
+                _, err = client.SendMessage(context.Background(), v.Info.Chat, msg)
+                if err != nil {
+                    fmt.Printf("Failed to send phonetic message: %v\n", err)
                 }
             }
         }
