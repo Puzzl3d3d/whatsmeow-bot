@@ -94,13 +94,15 @@ func GetEventHandler(client *whatsmeow.Client) func(interface{}) {
                     fmt.Printf("Failed to read phonetic response: %v\n", err)
                     return
                 }
-                
+
                 body = []byte(string(body))
                 body = []byte(strings.ReplaceAll(string(body), "<br>", "\n"))
                 reBold := regexp.MustCompile(`(?i)<b>(.*?)</b>`)
                 body = []byte(reBold.ReplaceAllString(string(body), "$1"))
                 reFont := regexp.MustCompile(`(?i)</?font[^>]*>`)
                 body = []byte(reFont.ReplaceAllString(string(body), ""))
+
+                body = "```\n"+body+"\n```"
                 
                 // Send the phonetic response back as a message
                 msg := &waProto.Message{
